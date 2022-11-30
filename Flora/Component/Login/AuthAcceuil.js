@@ -1,4 +1,7 @@
 import * as React from 'react';
+import { 
+    useState
+} from 'react';
 import {
     Text,
     SafeAreaView, 
@@ -9,11 +12,37 @@ import {
 } from "react-native";
 
 const AuthAcceuil = () => {
+    const [email, setEmail] = useState("");
+    const [error, setError] = useState("");
+
+    const MessageError = () => {
+        if (email.length === 0) {
+            setError("Entrer un numéro, addresse email ou nom d'utilisateur Valid !");
+        } else {
+            checkInput();
+        }
+    }
+
+    console.log(email);
+
+    const checkInput = () => {
+        const regexEmail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+        const regexPhone = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+        if (regexEmail.test(email)) {
+            console.log("email valid");
+        } else {
+            if (regexPhone.test(email)) {
+                console.log("phone number valid");
+            }
+        }
+    }
+    
     return (
         <SafeAreaView>
             <View style={styles.view}>
-                <TextInput style={styles.input} placeholder='Phone, email or username'/>
-                <TouchableOpacity style={styles.buttonNext}>
+                <TextInput style={styles.input} placeholder='Phone, email où nom d utilisateur' value={email} onChangeText={(email) => setEmail(email)}/>
+                    <Text style={styles.styleMessage}>{error}</Text>
+                <TouchableOpacity onPress={MessageError} style={styles.buttonNext}>
                     <Text style={styles.styleNext}>Next</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonPassword}>
@@ -35,7 +64,8 @@ const styles = StyleSheet.create({
         borderColor: "#CFD9DE",
         height: 58,
         width: 300,
-        borderRadius: 4
+        borderRadius: 4,
+        marginTop: 102
     },
     buttonNext: {
         marginLeft: "auto",
@@ -75,6 +105,9 @@ const styles = StyleSheet.create({
         marginRight: "auto",
         marginLeft: "auto",
         top: 5        
+    },
+    styleMessage: {
+        color: "red"
     }
 });
 
