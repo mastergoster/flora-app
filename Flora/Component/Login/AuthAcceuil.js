@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { 
-    useState
+    useState,
 } from 'react';
 import {
     Text,
@@ -9,17 +9,19 @@ import {
     TouchableOpacity, 
     View,
     StyleSheet,
-    NativeModule,
-    DevSettings
 } from "react-native";
+import axios from "react-native-axios";
+import Linking from "expo";
+import { useNavigation } from '@react-navigation/native';
 
 const AuthAcceuil = () => {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
-    const [valid, setValid] = useState("");
+    const [invalid, setInvalid] = useState("");
+
+    const navigation = useNavigation();
 
     const MessageError = () => {
-        // Refresh();
         if (email.length === 0) {
             setError(<Text style={styles.styleMessage}>Veuillez remplir le champ !</Text>);
         } else {
@@ -27,47 +29,47 @@ const AuthAcceuil = () => {
         }
     }
 
-    // const Refresh = () => {
-    //     if (setError.length != 0) {
-    //         console.log("test refresh");
-    //         setTimeout(() => {
-    //             DevSettings.reload();
-    //         }, 20000);
-    //         // DevSettings.reload();
-    //     }
-    // }
-
     const checkInput = () => {
         const regexEmail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
         const regexPhone = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-        if (regexEmail.test(email)) {
-            console.log("email valid");
+        if (regexEmail.test(email) || regexPhone.test(email)) {
+            console.log("email, phone valid");
+            navigation.navigate("Login", {name : "Login" });
             // handleSubmit();
         } else {
-            if (regexPhone.test(email)) {
-                console.log("phone number valid");
-                // handleSubmit();
-            } else {
-                setValid(<Text>Numéro de téléphone, Email ou nom utilisateur invalid</Text>);
+            setError('');
+            setError(<Text style={styles.styleMessage}>Numéro de téléphone, Email ou nom utilisateur invalid</Text>);
+            if (error.length != 0) {
+                setError('');
             }
         }
     }
 
-    const handleSubmit = () => {
-
+    const handleSubmit = async e => {
+        e.preventDefault();
+        const response = axios.post("api", {
+            email
+        });
+        if ("data" in response) {
+            navigation.navigate("Login", {name : "Login" });
+        } else {
+            setInvalid(<Text>Identifiant ou mot de passe incorrect !</Text>);
+        }
     }
     
     return (
         <SafeAreaView>
             <View style={styles.view}>
-                <TextInput style={styles.input} placeholder='Phone, email où nom d utilisateur' value={email} onChangeText={(email) => setEmail(email)}/>
+                <TextInput style={[styles.input, {borderColor: error ? "red" : "#CFD9DE"}]} placeholder='Phone, email où nom d utilisateur' value={email} onChangeText={(email) => setEmail(email)}/>
+                        {/* input empty ! or phone or email is not valid */}
                     {error}
-                    {valid}
+                        {/* email or phone do not exist*/}
+                    {invalid}
                 <TouchableOpacity onPress={MessageError} style={styles.buttonNext}>
                     <Text style={styles.styleNext}>Next</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonPassword}>
-                    <Text style={styles.stylePassword}>Forgot Password ?</Text>
+                    <Text onPress={() => Linking.openURL("https://coworkinmoulins.fr/mdpoublie")} style={styles.stylePassword}>Forgot Password ?</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -86,7 +88,7 @@ const styles = StyleSheet.create({
         height: 58,
         width: 300,
         borderRadius: 4,
-        marginTop: 102
+        marginTop: 102,
     },
     buttonNext: {
         marginLeft: "auto",
@@ -130,7 +132,23 @@ const styles = StyleSheet.create({
     styleMessage: {
         color: "red",
         marginRight: "auto",
-        marginLeft: "auto"
+        marginLeft: "auto",
+        marginTop: 20
+    },
+    styleInvalid: {
+        color: "red",
+        marginRight: "auto",
+        marginLeft: "auto",
+    },
+    styleInputInvalid: {
+        marginLeft: "auto",
+        marginRight: "auto",
+        borderWidth: 1,
+        borderColor: "#CFD9DE",
+        height: 58,
+        width: 300,
+        borderRadius: 4,
+        marginTop: 102,   
     }
 });
 
